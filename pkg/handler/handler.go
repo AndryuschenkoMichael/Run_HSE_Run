@@ -16,5 +16,10 @@ func NewHandler(services *service.Service) *Handler {
 func (h *Handler) InitRoutes() chi.Router {
 	router := chi.NewRouter()
 
+	router.Route("/auth", func(router chi.Router) {
+		router.Post("/send-email", h.sendEmail)
+		router.Post("/check-auth", h.checkAuth)
+	})
+
 	return router
 }
