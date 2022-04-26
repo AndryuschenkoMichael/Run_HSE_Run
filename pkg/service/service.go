@@ -1,10 +1,20 @@
 package service
 
-import "Run_Hse_Run/pkg/repository"
+import (
+	"Run_Hse_Run/pkg/emailer"
+	"Run_Hse_Run/pkg/repository"
+)
 
-type Service struct {
+type Sender interface {
+	SendEmail(email string, text string) error
 }
 
-func NewService(repo *repository.Repository) *Service {
-	return &Service{}
+type Service struct {
+	Sender
+}
+
+func NewService(repo *repository.Repository, sender *emailer.EmailSender) *Service {
+	return &Service{
+		Sender: NewSenderService(sender),
+	}
 }
