@@ -2,8 +2,8 @@ package main
 
 import (
 	runHse "Run_Hse_Run"
-	"Run_Hse_Run/pkg/emailer"
 	"Run_Hse_Run/pkg/handler"
+	"Run_Hse_Run/pkg/mailer"
 	"Run_Hse_Run/pkg/repository"
 	"Run_Hse_Run/pkg/service"
 	"github.com/joho/godotenv"
@@ -23,14 +23,14 @@ func main() {
 	}
 
 	dialer := gomail.NewDialer(
-		viper.GetString("emailer.host"),
-		viper.GetInt("emailer.port"),
-		viper.GetString("emailer.email"),
-		os.Getenv("EMAIL_PASSWORD"))
+		viper.GetString("mailer.host"),
+		viper.GetInt("mailer.port"),
+		viper.GetString("mailer.email"),
+		os.Getenv("MAIL_PASSWORD"))
 
-	emailers := emailer.NewEmailSender(dialer)
+	mailers := mailer.NewEmailSender(dialer)
 	repositories := repository.NewRepository()
-	services := service.NewService(repositories, emailers)
+	services := service.NewService(repositories, mailers)
 	handlers := handler.NewHandler(services)
 
 	srv := new(runHse.Server)

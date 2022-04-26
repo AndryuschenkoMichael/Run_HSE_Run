@@ -1,5 +1,5 @@
 port: 8080
-emailer:
+mailer:
   port: 587
   host: "smtp.gmail.com"
   email: "mykle66@gmail.com"
