@@ -28,7 +28,7 @@ func main() {
 		viper.GetString("mailer.email"),
 		os.Getenv("MAIL_PASSWORD"))
 
-	mailers := mailer.NewEmailSender(dialer)
+	mailers := mailer.NewMailer(dialer)
 	repositories := repository.NewRepository()
 	services := service.NewService(repositories, mailers)
 	handlers := handler.NewHandler(services)

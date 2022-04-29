@@ -6,12 +6,12 @@ type Sender interface {
 	SendEmail(email string, text string) error
 }
 
-type EmailSender struct {
+type Mailer struct {
 	Sender
 }
 
-func NewEmailSender(dialer *gomail.Dialer) *EmailSender {
-	return &EmailSender{
+func NewMailer(dialer *gomail.Dialer) *Mailer {
+	return &Mailer{
 		Sender: NewSendEmail(dialer),
 	}
 }

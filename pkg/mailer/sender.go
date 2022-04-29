@@ -5,15 +5,15 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-type SenderEmail struct {
+type EmailSender struct {
 	dialer *gomail.Dialer
 }
 
-func NewSendEmail(dialer *gomail.Dialer) *SenderEmail {
-	return &SenderEmail{dialer: dialer}
+func NewSendEmail(dialer *gomail.Dialer) *EmailSender {
+	return &EmailSender{dialer: dialer}
 }
 
-func (s *SenderEmail) SendEmail(email string, text string) error {
+func (s *EmailSender) SendEmail(email string, text string) error {
 	message := gomail.NewMessage()
 	message.SetHeader("From", viper.GetString("mailer.email"))
 	message.SetHeader("To", email)

@@ -9,7 +9,7 @@ import (
 )
 
 type SenderService struct {
-	sender *mailer.EmailSender
+	sender *mailer.Mailer
 }
 
 func (s *SenderService) SendEmail(email string) error {
@@ -34,6 +34,6 @@ func (s *SenderService) SendEmail(email string) error {
 	return s.sender.SendEmail(email, buffer.String())
 }
 
-func NewSenderService(sender *mailer.EmailSender) *SenderService {
+func NewSenderService(sender *mailer.Mailer) *SenderService {
 	return &SenderService{sender: sender}
 }

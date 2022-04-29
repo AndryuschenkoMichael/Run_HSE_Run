@@ -15,12 +15,18 @@ type Sender interface {
 	SendEmail(email string) error
 }
 
-type Service struct {
-	Sender
+type Authorization interface {
+	GenerateToken(email string) (string, error)
 }
 
-func NewService(repo *repository.Repository, sender *mailer.EmailSender) *Service {
+type Service struct {
+	Sender
+	Authorization
+}
+
+func NewService(repo *repository.Repository, sender *mailer.Mailer) *Service {
 	return &Service{
-		Sender: NewSenderService(sender),
+		Sender:        NewSenderService(sender),
+		Authorization: NewAuthService(),
 	}
 }
