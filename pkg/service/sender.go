@@ -15,9 +15,9 @@ type SenderService struct {
 func (s *SenderService) SendEmail(email string) error {
 	code := rand.Intn(9000) + 1000
 
-	mu.Lock()
+	Mu.Lock()
 	Codes[email] = code
-	mu.Unlock()
+	Mu.Unlock()
 
 	buffer := bytes.NewBufferString("")
 	tmpl, _ := template.ParseFiles("templates/message.html")

@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	mu    sync.Mutex
+	Mu    sync.Mutex
 	Codes = make(map[string]int)
 )
 
