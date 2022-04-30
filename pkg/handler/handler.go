@@ -21,5 +21,9 @@ func (h *Handler) InitRoutes() chi.Router {
 		router.Post("/check-auth", h.checkAuth)
 	})
 
+	router.Route("/api", func(router chi.Router) {
+		router.Use(h.authorizationOnly)
+	})
+
 	return router
 }
