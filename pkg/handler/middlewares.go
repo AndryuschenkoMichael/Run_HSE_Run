@@ -7,11 +7,10 @@ import (
 
 func (h *Handler) authorizationOnly(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		auth := r.Header.Get("Authorization")
-		email := r.Header.Get("Email")
+		token := r.Header.Get("Authorization")
 
-		token, err := h.services.GenerateToken(email)
-		if err != nil || token != auth {
+		email, err := h.services.ParseToken(token)
+		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

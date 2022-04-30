@@ -60,9 +60,9 @@ func (h *Handler) checkAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userToken := struct {
-		token string
+		Token string `json:"token"`
 	}{
-		token: token,
+		Token: token,
 	}
 
 	tokenString, _ := json.Marshal(userToken)

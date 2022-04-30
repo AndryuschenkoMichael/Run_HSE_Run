@@ -17,6 +17,7 @@ type Sender interface {
 
 type Authorization interface {
 	GenerateToken(email string) (string, error)
+	ParseToken(accessToken string) (string, error)
 }
 
 type Service struct {
