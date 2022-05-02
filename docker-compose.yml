@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  run-hse-run:
+    restart: always
+    build: ./
+    command: ./Run_HSE_Run
+    ports:
+      - "8080:8080"
+      - "587:587"
+    depends_on:
+      - db
+
+  db:
+    restart: unless-stopped
+    image: postgres:latest
+    container_name: clair_postgres
+
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "husky_go"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - .:/var/lib/postgresql/data
+      - ./schema/000001_init.up.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"

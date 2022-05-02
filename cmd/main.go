@@ -7,6 +7,7 @@ import (
 	"Run_Hse_Run/pkg/repository"
 	"Run_Hse_Run/pkg/service"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"gopkg.in/gomail.v2"
 	"log"
@@ -28,13 +29,26 @@ func main() {
 		viper.GetString("mailer.email"),
 		os.Getenv("MAIL_PASSWORD"))
 
+	db, err := repository.NewPostgresDB(repository.Config{
+		Host:     viper.GetString("db.host"),
+		Port:     viper.GetString("db.port"),
+		Username: viper.GetString("db.username"),
+		Password: os.Getenv("DB_PASSWORD"),
+		DBName:   viper.GetString("db.dbname"),
+		SSLMode:  viper.GetString("db.sslmode"),
+	})
+
+	if err != nil {
+		log.Fatalf("Faild to initialize db: %s", err.Error())
+	}
+
 	mailers := mailer.NewMailer(dialer)
-	repositories := repository.NewRepository()
+	repositories := repository.NewRepository(db)
 	services := service.NewService(repositories, mailers)
 	handlers := handler.NewHandler(services)
 
 	srv := new(runHse.Server)
-	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+	if err := srv.Run(viper.GetString("host"), viper.GetString("port"), handlers.InitRoutes()); err != nil {
 		log.Fatalf("Error in running server: %s", err.Error())
 	}
 }

@@ -1,5 +1,12 @@
 port: 8080
+host: "localhost"
 mailer:
   port: 587
   host: "smtp.gmail.com"
   email: "mykle66@gmail.com"
+db:
+  host: "clair_postgres"
+  port: 5432
+  username: "postgres"
+  dbname: "postgres"
+  sslmode: "disable"

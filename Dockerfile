@@ -4,11 +4,9 @@ RUN go version
 ENV GOPATH=/
 
 COPY ./ ./
+COPY ./schema/000001_init.up.sql /docker-entrypoint-initdb.d/init.sql
 
 RUN go mod download
 RUN go build -o Run_HSE_Run ./cmd/main.go
-
-EXPOSE 8080
-EXPOSE 587
 
 CMD ["./Run_HSE_Run"]
