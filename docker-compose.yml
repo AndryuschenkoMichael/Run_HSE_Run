@@ -6,7 +6,7 @@ services:
     build: ./
     command: ./Run_HSE_Run
     ports:
-      - "8080:8080"
+      - "8000:8080"
       - "587:587"
     depends_on:
       - db

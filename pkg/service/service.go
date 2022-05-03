@@ -2,6 +2,7 @@ package service
 
 import (
 	"Run_Hse_Run/pkg/mailer"
+	"Run_Hse_Run/pkg/model"
 	"Run_Hse_Run/pkg/repository"
 	"sync"
 )
@@ -16,8 +17,10 @@ type Sender interface {
 }
 
 type Authorization interface {
+	CreateUser(user model.User) (int, error)
+	GetUser(email string) (model.User, error)
 	GenerateToken(email string) (string, error)
-	ParseToken(accessToken string) (string, error)
+	ParseToken(accessToken string) (int, error)
 }
 
 type Service struct {
@@ -28,6 +31,6 @@ type Service struct {
 func NewService(repo *repository.Repository, sender *mailer.Mailer) *Service {
 	return &Service{
 		Sender:        NewSenderService(sender),
-		Authorization: NewAuthService(),
+		Authorization: NewAuthService(repo),
 	}
 }

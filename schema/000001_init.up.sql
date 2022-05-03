@@ -1,9 +1,8 @@
 CREATE TABLE users
 (
-    id                 serial PRIMARY KEY,
-    user_name          varchar(255) not null unique,
-    user_mail          varchar(255) not null unique,
-    authorization_code integer      not null
+    id       serial PRIMARY KEY,
+    nickname varchar(255) not null unique,
+    email    varchar(255) not null unique
 );
 
 CREATE TABLE friends

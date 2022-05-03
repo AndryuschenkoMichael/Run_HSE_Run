@@ -48,7 +48,7 @@ func main() {
 	handlers := handler.NewHandler(services)
 
 	srv := new(runHse.Server)
-	if err := srv.Run(viper.GetString("host"), viper.GetString("port"), handlers.InitRoutes()); err != nil {
+	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
 		log.Fatalf("Error in running server: %s", err.Error())
 	}
 }

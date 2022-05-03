@@ -1,5 +1,4 @@
 port: 8080
-host: "localhost"
 mailer:
   port: 587
   host: "smtp.gmail.com"

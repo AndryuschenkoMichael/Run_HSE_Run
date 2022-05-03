@@ -9,13 +9,13 @@ func (h *Handler) authorizationOnly(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
 
-		email, err := h.services.ParseToken(token)
+		userId, err := h.services.ParseToken(token)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "email", email)
+		ctx := context.WithValue(r.Context(), "UserId", userId)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
