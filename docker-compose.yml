@@ -25,4 +25,4 @@ services:
       - .:/var/lib/postgresql/data
       - ./schema/000001_init.up.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "5432:5432"
+      - "5436:5432"
