@@ -30,8 +30,14 @@ func (h *Handler) InitRoutes() chi.Router {
 		router.Use(h.authorizationOnly)
 	})
 
-	router.Get("/kek", func(writer http.ResponseWriter, request *http.Request) {
-		fmt.Fprintf(writer, "%s", "kek")
+	router.Get("/ping", func(writer http.ResponseWriter, request *http.Request) {
+		_, err := fmt.Fprintf(writer, "%s", "pong")
+		if err != nil {
+			writer.WriteHeader(http.StatusOK)
+		} else {
+			writer.WriteHeader(http.StatusInternalServerError)
+		}
+
 	})
 
 	return router

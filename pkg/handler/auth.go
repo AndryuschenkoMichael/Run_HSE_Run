@@ -4,6 +4,7 @@ import (
 	"Run_Hse_Run/pkg/model"
 	"Run_Hse_Run/pkg/service"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -61,6 +62,7 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.services.GenerateToken(auth.Email)
 	if err != nil {
+		fmt.Println("kek")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
