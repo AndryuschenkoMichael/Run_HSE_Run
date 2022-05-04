@@ -2,7 +2,7 @@ port: 8080
 mailer:
   port: 587
   host: "smtp.gmail.com"
-  email: "mykle66@gmail.com"
+  email: "run.hse.run@gmail.com"
 db:
   host: "clair_postgres"
   port: 5432
