@@ -10,10 +10,18 @@ type FriendsService struct {
 }
 
 func (f *FriendsService) AddFriend(userIdFrom, userIdTo int) error {
+	if userIdFrom == userIdTo {
+		return nil
+	}
+
 	return f.repo.AddFriend(userIdFrom, userIdTo)
 }
 
 func (f *FriendsService) DeleteFriend(userIdFrom, userIdTo int) error {
+	if userIdFrom == userIdTo {
+		return nil
+	}
+
 	return f.repo.DeleteFriend(userIdFrom, userIdTo)
 }
 

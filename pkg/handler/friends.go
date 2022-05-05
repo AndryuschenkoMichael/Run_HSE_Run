@@ -68,6 +68,7 @@ func (h *Handler) getFriends(w http.ResponseWriter, r *http.Request) {
 	}
 
 	users, err := h.services.GetFriends(userId)
+
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
