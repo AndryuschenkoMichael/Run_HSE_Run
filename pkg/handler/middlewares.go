@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -11,9 +12,19 @@ const (
 
 func (h *Handler) authorizationOnly(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
+		bearerToken := r.Header.Get("Authorization")
+		tokenString := strings.Split(bearerToken, " ")
+		if len(tokenString) != 2 {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 
-		userId, err := h.services.ParseToken(token)
+		if tokenString[0] != "Bearer" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		userId, err := h.services.ParseToken(tokenString[1])
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return

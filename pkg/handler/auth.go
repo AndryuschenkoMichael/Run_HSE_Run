@@ -53,13 +53,12 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
 
 	id, err := h.services.CreateUser(user)
 
-	if err.Error() == service.NicknameError {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		if err.Error() == service.NicknameError {
+			w.WriteHeader(http.StatusBadRequest)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 

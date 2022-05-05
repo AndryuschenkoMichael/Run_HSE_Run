@@ -4,6 +4,7 @@ import (
 	"Run_Hse_Run/pkg/service"
 	"fmt"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"net/http"
 )
 
@@ -19,6 +20,7 @@ func (h *Handler) InitRoutes() chi.Router {
 	router := chi.NewRouter()
 	// fix if I will use websocket
 	//router.Use(middleware.Logger, middleware.Timeout(time.Minute))
+	router.Use(middleware.Logger)
 
 	router.Route("/auth", func(router chi.Router) {
 		router.Post("/send-email", h.sendEmail)
@@ -27,8 +29,8 @@ func (h *Handler) InitRoutes() chi.Router {
 	})
 
 	router.Route("/api", func(router chi.Router) {
+		router.Use(h.authorizationOnly)
 		router.Route("/friends", func(router chi.Router) {
-			router.Use(h.authorizationOnly)
 			router.Put("/add-friend", h.addFriend)
 			router.Delete("/delete-friend", h.deleteFriend)
 			router.Get("/get-friends", h.getFriends)
