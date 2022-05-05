@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"math/rand"
+	"time"
 )
 
 type SenderService struct {
@@ -35,5 +36,6 @@ func (s *SenderService) SendEmail(email string) error {
 }
 
 func NewSenderService(sender *mailer.Mailer) *SenderService {
+	rand.Seed(time.Now().Unix())
 	return &SenderService{sender: sender}
 }

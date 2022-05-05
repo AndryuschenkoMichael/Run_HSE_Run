@@ -9,10 +9,6 @@ type FriendsService struct {
 	repo *repository.Repository
 }
 
-func (f *FriendsService) GetUserById(userId int) (model.User, error) {
-	return f.repo.GetUserById(userId)
-}
-
 func (f *FriendsService) AddFriend(userIdFrom, userIdTo int) error {
 	return f.repo.AddFriend(userIdFrom, userIdTo)
 }

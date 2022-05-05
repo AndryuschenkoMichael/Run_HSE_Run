@@ -27,13 +27,18 @@ type Friends interface {
 	AddFriend(userIdFrom, userIdTo int) error
 	DeleteFriend(userIdFrom, userIdTo int) error
 	GetFriends(userId int) ([]model.User, error)
+}
+
+type Users interface {
 	GetUserById(userId int) (model.User, error)
+	GetUsersByNicknamePattern(nickname string) ([]model.User, error)
 }
 
 type Service struct {
 	Sender
 	Authorization
 	Friends
+	Users
 }
 
 func NewService(repo *repository.Repository, sender *mailer.Mailer) *Service {
@@ -41,5 +46,6 @@ func NewService(repo *repository.Repository, sender *mailer.Mailer) *Service {
 		Sender:        NewSenderService(sender),
 		Authorization: NewAuthService(repo),
 		Friends:       NewFriendsService(repo),
+		Users:         NewUsersService(repo),
 	}
 }

@@ -4,13 +4,16 @@ import (
 	"Run_Hse_Run/pkg/model"
 	"Run_Hse_Run/pkg/repository"
 	"errors"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"os"
+	"regexp"
 	"time"
 )
 
 const (
-	tokenTTL = 24 * 365 * 2 * time.Hour
+	tokenTTL      = 24 * 365 * 2 * time.Hour
+	NicknameError = "nickname in incorrect format"
 )
 
 type AuthService struct {
@@ -18,6 +21,20 @@ type AuthService struct {
 }
 
 func (a *AuthService) CreateUser(user model.User) (int, error) {
+	if user.Nickname == "" {
+		return 0, errors.New(NicknameError)
+	}
+
+	expr := fmt.Sprintf("^[a-zA-Z0-9_]{%d}", len(user.Nickname))
+	validUser, err := regexp.Compile(expr)
+	if err != nil {
+		return 0, errors.New(NicknameError)
+	}
+
+	if !validUser.MatchString(user.Nickname) {
+		return 0, errors.New(NicknameError)
+	}
+
 	return a.repo.CreateUser(user)
 }
 

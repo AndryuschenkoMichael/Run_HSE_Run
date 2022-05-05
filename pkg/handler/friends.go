@@ -79,7 +79,7 @@ func (h *Handler) getFriends(w http.ResponseWriter, r *http.Request) {
 	w.Write(usersJson)
 }
 
-func (h *Handler) getUserById(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) getMe(w http.ResponseWriter, r *http.Request) {
 	userId, ok := r.Context().Value(UserId).(int)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)

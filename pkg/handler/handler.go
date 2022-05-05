@@ -27,12 +27,16 @@ func (h *Handler) InitRoutes() chi.Router {
 	})
 
 	router.Route("/api", func(router chi.Router) {
-		router.Use(h.authorizationOnly)
 		router.Route("/friends", func(router chi.Router) {
+			router.Use(h.authorizationOnly)
 			router.Put("/add-friend", h.addFriend)
 			router.Delete("/delete-friend", h.deleteFriend)
 			router.Get("/get-friends", h.getFriends)
-			router.Get("/get-user-by-id", h.getUserById)
+			router.Get("/get-me", h.getMe)
+		})
+		router.Route("/users", func(router chi.Router) {
+			router.Get("/get-by-id", h.getUserById)
+			router.Get("/get-by-nickname", h.getUserByNickname)
 		})
 	})
 
