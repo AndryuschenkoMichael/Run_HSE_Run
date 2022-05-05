@@ -23,14 +23,23 @@ type Authorization interface {
 	ParseToken(accessToken string) (int, error)
 }
 
+type Friends interface {
+	AddFriend(userIdFrom, userIdTo int) error
+	DeleteFriend(userIdFrom, userIdTo int) error
+	GetFriends(userId int) ([]model.User, error)
+	GetUserById(userId int) (model.User, error)
+}
+
 type Service struct {
 	Sender
 	Authorization
+	Friends
 }
 
 func NewService(repo *repository.Repository, sender *mailer.Mailer) *Service {
 	return &Service{
 		Sender:        NewSenderService(sender),
 		Authorization: NewAuthService(repo),
+		Friends:       NewFriendsService(repo),
 	}
 }

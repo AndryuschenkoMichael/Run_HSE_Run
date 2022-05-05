@@ -10,12 +10,21 @@ type Authorization interface {
 	GetUser(email string) (model.User, error)
 }
 
+type Friends interface {
+	AddFriend(userIdFrom, userIdTo int) error
+	DeleteFriend(userIdFrom, userIdTo int) error
+	GetFriends(userId int) ([]model.User, error)
+	GetUserById(userId int) (model.User, error)
+}
+
 type Repository struct {
 	Authorization
+	Friends
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		Authorization: NewAuthPostgres(db),
+		Friends:       NewFriendPostgres(db),
 	}
 }
