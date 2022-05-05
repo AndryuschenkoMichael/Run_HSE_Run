@@ -13,7 +13,7 @@ type UsersPostgres struct {
 func (u *UsersPostgres) GetUsersByNicknamePattern(nickname string) ([]model.User, error) {
 	var users []model.User
 
-	query := fmt.Sprintf(`SELECT * FROM %s us WHERE us.nickname LIKE ?`, usersTable)
+	query := fmt.Sprintf(`SELECT * FROM %s us WHERE us.nickname LIKE $1`, usersTable)
 	err := u.db.Select(&users, query, nickname+"%")
 
 	return users, err

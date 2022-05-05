@@ -26,10 +26,6 @@ func (h *Handler) getUserById(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) getUserByNickname(w http.ResponseWriter, r *http.Request) {
 	nickname := r.URL.Query().Get("nickname")
-	if nickname == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
 
 	users, err := h.services.GetUsersByNicknamePattern(nickname)
 	if err != nil {
