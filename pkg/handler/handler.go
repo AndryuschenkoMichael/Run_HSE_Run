@@ -40,6 +40,7 @@ func (h *Handler) InitRoutes() chi.Router {
 			router.Get("/get-by-id", h.getUserById)
 			router.Get("/get-by-nickname", h.getUserByNickname)
 			router.Put("/change-nickname", h.changeNickname)
+			router.Put("/change-profile-image", h.changeProfileImage)
 		})
 	})
 

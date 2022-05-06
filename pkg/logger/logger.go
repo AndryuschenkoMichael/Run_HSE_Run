@@ -10,5 +10,5 @@ var (
 )
 
 func init() {
-	WarningLogger = log.New(os.Stderr, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
+	WarningLogger = log.New(os.Stderr, "WARNING: ", log.Ldate|log.Ltime|log.Llongfile)
 }

@@ -39,6 +39,7 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
 	var auth struct {
 		Email    string `json:"email"`
 		Nickname string `json:"nickname"`
+		Image    int    `json:"image"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -65,6 +66,7 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
 	user := model.User{
 		Email:    auth.Email,
 		Nickname: auth.Nickname,
+		Image:    auth.Image,
 	}
 
 	id, err := h.services.CreateUser(user)

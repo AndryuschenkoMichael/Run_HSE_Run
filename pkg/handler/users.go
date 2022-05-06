@@ -77,3 +77,34 @@ func (h *Handler) changeNickname(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func (h *Handler) changeProfileImage(w http.ResponseWriter, r *http.Request) {
+	var profileImage struct {
+		Image int `json:"image"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+
+	if err := decoder.Decode(&profileImage); err != nil {
+		logger.WarningLogger.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	userId, ok := r.Context().Value(UserId).(int)
+	if !ok {
+		logger.WarningLogger.Println("invalid context")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err := h.services.ChangeProfileImage(userId, profileImage.Image)
+
+	if err != nil {
+		logger.WarningLogger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

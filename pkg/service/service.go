@@ -33,6 +33,7 @@ type Users interface {
 	GetUserById(userId int) (model.User, error)
 	GetUsersByNicknamePattern(nickname string) ([]model.User, error)
 	RenameUser(userId int, nickname string) error
+	ChangeProfileImage(userId, image int) error
 }
 
 type Service struct {

@@ -10,6 +10,12 @@ type UsersPostgres struct {
 	db *sqlx.DB
 }
 
+func (u *UsersPostgres) ChangeProfileImage(userId, image int) error {
+	query := fmt.Sprintf("UPDATE %s SET image = $1 WHERE id = $2", usersTable)
+	_, err := u.db.Exec(query, image, userId)
+	return err
+}
+
 func (u *UsersPostgres) RenameUser(userId int, nickname string) error {
 	query := fmt.Sprintf("UPDATE %s SET nickname = $1 WHERE id = $2", usersTable)
 	_, err := u.db.Exec(query, nickname, userId)

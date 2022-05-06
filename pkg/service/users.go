@@ -12,8 +12,16 @@ type UsersService struct {
 	repo *repository.Repository
 }
 
+func (u *UsersService) ChangeProfileImage(userId, image int) error {
+	return u.repo.ChangeProfileImage(userId, image)
+}
+
 func (u *UsersService) RenameUser(userId int, nickname string) error {
 	if nickname == "" {
+		return errors.New(NicknameError)
+	}
+
+	if 15 < len(nickname) {
 		return errors.New(NicknameError)
 	}
 

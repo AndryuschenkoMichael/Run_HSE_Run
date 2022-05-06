@@ -25,6 +25,10 @@ func (a *AuthService) CreateUser(user model.User) (int, error) {
 		return 0, errors.New(NicknameError)
 	}
 
+	if 15 < len(user.Nickname) {
+		return 0, errors.New(NicknameError)
+	}
+
 	expr := fmt.Sprintf("^[a-zA-Z0-9_]{%d}", len(user.Nickname))
 	validUser, err := regexp.Compile(expr)
 	if err != nil {

@@ -2,7 +2,8 @@ CREATE TABLE users
 (
     id       serial PRIMARY KEY,
     nickname varchar(255) not null unique,
-    email    varchar(255) not null unique
+    email    varchar(255) not null unique,
+    image    int not null
 );
 
 CREATE TABLE friends
