@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"Run_Hse_Run/pkg/logger"
 	"Run_Hse_Run/pkg/service"
 	"encoding/json"
 	"net/http"
@@ -10,12 +11,14 @@ import (
 func (h *Handler) getUserById(w http.ResponseWriter, r *http.Request) {
 	userId, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil {
+		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	user, err := h.services.GetUserById(userId)
 	if err != nil {
+		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -30,6 +33,7 @@ func (h *Handler) getUserByNickname(w http.ResponseWriter, r *http.Request) {
 
 	users, err := h.services.GetUsersByNicknamePattern(nickname)
 	if err != nil {
+		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -47,17 +51,14 @@ func (h *Handler) changeNickname(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&newNickname); err != nil {
+		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	userId, ok := r.Context().Value(UserId).(int)
 	if !ok {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if !ok {
+		logger.WarningLogger.Println("invalid context")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -65,6 +66,7 @@ func (h *Handler) changeNickname(w http.ResponseWriter, r *http.Request) {
 	err := h.services.RenameUser(userId, newNickname.Nickname)
 
 	if err != nil {
+		logger.WarningLogger.Println(err)
 		if err.Error() == service.NicknameError {
 			w.WriteHeader(http.StatusBadRequest)
 		} else {

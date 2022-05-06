@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"Run_Hse_Run/pkg/logger"
 	"Run_Hse_Run/pkg/model"
 	"Run_Hse_Run/pkg/service"
 	"encoding/json"
@@ -15,11 +16,18 @@ func (h *Handler) sendEmail(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&email); err != nil {
+		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
+	if email.Email == "" {
+		logger.WarningLogger.Println("invalid email")
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
 	if err := h.services.SendEmail(email.Email); err != nil {
+		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -36,12 +44,20 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&auth); err != nil {
+		logger.WarningLogger.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if auth.Nickname == "" || auth.Email == "" {
+		logger.WarningLogger.Println("invalid email or nickname")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	_, err := h.services.GetUser(auth.Email)
 	if err == nil {
+		logger.WarningLogger.Println("user already exist")
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
@@ -54,6 +70,7 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
 	id, err := h.services.CreateUser(user)
 
 	if err != nil {
+		logger.WarningLogger.Println(err)
 		if err.Error() == service.NicknameError {
 			w.WriteHeader(http.StatusBadRequest)
 		} else {
@@ -66,6 +83,7 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
 
 	token, err := h.services.GenerateToken(auth.Email)
 	if err != nil {
+		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -93,6 +111,13 @@ func (h *Handler) checkAuth(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&auth); err != nil {
+		logger.WarningLogger.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if auth.Code == 0 || auth.Email == "" {
+		logger.WarningLogger.Println("invalid email or code")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -102,23 +127,27 @@ func (h *Handler) checkAuth(w http.ResponseWriter, r *http.Request) {
 	service.Mu.Unlock()
 
 	if !ok {
+		logger.WarningLogger.Println("email didn't added")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	if code != auth.Code {
+		logger.WarningLogger.Println("incorrect code")
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	user, err := h.services.GetUser(auth.Email)
 	if err != nil {
+		logger.WarningLogger.Println("user doesn't exist in db")
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
 	token, err := h.services.GenerateToken(auth.Email)
 	if err != nil {
+		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

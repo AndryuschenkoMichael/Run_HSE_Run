@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"Run_Hse_Run/pkg/logger"
 	"encoding/json"
 	"net/http"
 )
@@ -13,23 +14,21 @@ func (h *Handler) addFriend(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&userIdTo); err != nil {
+		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	userId, ok := r.Context().Value(UserId).(int)
 	if !ok {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if !ok {
+		logger.WarningLogger.Println("invalid context")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err := h.services.AddFriend(userId, userIdTo.UserId)
 	if err != nil {
+		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -46,12 +45,14 @@ func (h *Handler) deleteFriend(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&userIdTo); err != nil {
+		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	userId, ok := r.Context().Value(UserId).(int)
 	if !ok {
+		logger.WarningLogger.Println("invalid context")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -63,6 +64,7 @@ func (h *Handler) deleteFriend(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) getFriends(w http.ResponseWriter, r *http.Request) {
 	userId, ok := r.Context().Value(UserId).(int)
 	if !ok {
+		logger.WarningLogger.Println("invalid context")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -70,6 +72,7 @@ func (h *Handler) getFriends(w http.ResponseWriter, r *http.Request) {
 	users, err := h.services.GetFriends(userId)
 
 	if err != nil {
+		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -83,12 +86,14 @@ func (h *Handler) getFriends(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) getMe(w http.ResponseWriter, r *http.Request) {
 	userId, ok := r.Context().Value(UserId).(int)
 	if !ok {
+		logger.WarningLogger.Println("invalid context")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	user, err := h.services.GetUserById(userId)
 	if err != nil {
+		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
