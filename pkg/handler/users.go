@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"Run_Hse_Run/pkg/service"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -36,4 +37,41 @@ func (h *Handler) getUserByNickname(w http.ResponseWriter, r *http.Request) {
 	usersJson, _ := json.Marshal(users)
 	w.WriteHeader(http.StatusOK)
 	w.Write(usersJson)
+}
+
+func (h *Handler) changeNickname(w http.ResponseWriter, r *http.Request) {
+	var newNickname struct {
+		Nickname string `json:"nickname"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+
+	if err := decoder.Decode(&newNickname); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	userId, ok := r.Context().Value(UserId).(int)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err := h.services.RenameUser(userId, newNickname.Nickname)
+
+	if err != nil {
+		if err.Error() == service.NicknameError {
+			w.WriteHeader(http.StatusBadRequest)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

@@ -19,6 +19,7 @@ type Friends interface {
 type Users interface {
 	GetUserById(userId int) (model.User, error)
 	GetUsersByNicknamePattern(nickname string) ([]model.User, error)
+	RenameUser(userId int, nickname string) error
 }
 
 type Repository struct {

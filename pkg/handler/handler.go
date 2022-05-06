@@ -39,6 +39,7 @@ func (h *Handler) InitRoutes() chi.Router {
 		router.Route("/users", func(router chi.Router) {
 			router.Get("/get-by-id", h.getUserById)
 			router.Get("/get-by-nickname", h.getUserByNickname)
+			router.Put("/change-nickname", h.changeNickname)
 		})
 	})
 
