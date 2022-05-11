@@ -8,6 +8,7 @@ import (
 const (
 	usersTable   = "users"
 	friendsTable = "friends"
+	roomsTable   = "rooms"
 )
 
 type Config struct {

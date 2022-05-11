@@ -36,11 +36,16 @@ type Users interface {
 	ChangeProfileImage(userId, image int) error
 }
 
+type Game interface {
+	GetRoomByCodePattern(code string) ([]model.Room, error)
+}
+
 type Service struct {
 	Sender
 	Authorization
 	Friends
 	Users
+	Game
 }
 
 func NewService(repo *repository.Repository, sender *mailer.Mailer) *Service {
@@ -49,5 +54,6 @@ func NewService(repo *repository.Repository, sender *mailer.Mailer) *Service {
 		Authorization: NewAuthService(repo),
 		Friends:       NewFriendsService(repo),
 		Users:         NewUsersService(repo),
+		Game:          NewGameService(repo),
 	}
 }

@@ -34,13 +34,17 @@ func (h *Handler) InitRoutes() chi.Router {
 			router.Put("/add-friend", h.addFriend)
 			router.Delete("/delete-friend", h.deleteFriend)
 			router.Get("/get-friends", h.getFriends)
-			router.Get("/get-me", h.getMe)
 		})
 		router.Route("/users", func(router chi.Router) {
+			router.Get("/get-me", h.getMe)
 			router.Get("/get-by-id", h.getUserById)
 			router.Get("/get-by-nickname", h.getUserByNickname)
 			router.Put("/change-nickname", h.changeNickname)
 			router.Put("/change-profile-image", h.changeProfileImage)
+		})
+
+		router.Route("/game", func(router chi.Router) {
+			router.Get("/get-rooms-by-code", h.getRoomByCode)
 		})
 	})
 

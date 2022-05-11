@@ -108,3 +108,24 @@ func (h *Handler) changeProfileImage(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func (h *Handler) getMe(w http.ResponseWriter, r *http.Request) {
+	userId, ok := r.Context().Value(UserId).(int)
+	if !ok {
+		logger.WarningLogger.Println("invalid context")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	user, err := h.services.GetUserById(userId)
+	if err != nil {
+		logger.WarningLogger.Println(err)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	userJson, _ := json.Marshal(user)
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(userJson)
+}

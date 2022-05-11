@@ -23,10 +23,15 @@ type Users interface {
 	ChangeProfileImage(userId, image int) error
 }
 
+type Game interface {
+	GetRoomByCodePattern(code string) ([]model.Room, error)
+}
+
 type Repository struct {
 	Authorization
 	Friends
 	Users
+	Game
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -34,5 +39,6 @@ func NewRepository(db *sqlx.DB) *Repository {
 		Authorization: NewAuthPostgres(db),
 		Friends:       NewFriendPostgres(db),
 		Users:         NewUsersPostgres(db),
+		Game:          NewGamePostgres(db),
 	}
 }
