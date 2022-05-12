@@ -14,6 +14,7 @@ type WebsocketService struct {
 }
 
 func (w *WebsocketService) SendGame(game model.Game) error {
+	// inmplement me
 	return nil
 }
 
