@@ -37,7 +37,11 @@ type Users interface {
 }
 
 type Game interface {
-	GetRoomByCodePattern(code string) ([]model.Room, error)
+	GetRoomByCodePattern(code string, campusId int) ([]model.Room, error)
+	GenerateRandomRooms(startRoomId, count, campusId int) ([]model.Room, error)
+	GetDistanceBetweenRooms(startRoomId int, rooms []model.Room) (float64, error)
+	GenerateRoomsByDistance(startRoomId int, rooms []model.Room, distance float64) ([]model.Room, error)
+	GenerateRoomsForGame(startUser1, startUser2, count, campusId int) ([]model.Room, []model.Room, error)
 }
 
 type Service struct {

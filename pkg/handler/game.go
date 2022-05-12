@@ -9,7 +9,7 @@ import (
 func (h *Handler) getRoomByCode(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 
-	rooms, err := h.services.GetRoomByCodePattern(code)
+	rooms, err := h.services.GetRoomByCodePattern(code, 1)
 	if err != nil {
 		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusNotFound)

@@ -24,7 +24,10 @@ type Users interface {
 }
 
 type Game interface {
-	GetRoomByCodePattern(code string) ([]model.Room, error)
+	GetRoomByCodePattern(code string, campusId int) ([]model.Room, error)
+	GetEdge(startRoomId, endRoomId int) (model.Edge, error)
+	GetListOfEdges(startRoomId int) ([]model.Edge, error)
+	GetRoomById(roomId int) (model.Room, error)
 }
 
 type Repository struct {
