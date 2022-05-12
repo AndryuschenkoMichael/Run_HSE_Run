@@ -19,6 +19,71 @@ func (g *GamePostgres) GetRoomById(roomId int) (model.Room, error) {
 	return room, err
 }
 
+func (g *GamePostgres) AddCall(userIdFirst, userIdSecond, roomIdFirst int) (model.Game, error) {
+	var count int
+	tx, err := g.db.Begin()
+	if err != nil {
+		return model.Game{}, err
+	}
+
+	querySelect := fmt.Sprintf("SELECT Count(id) FROM %s WHERE user_id_first=$1 AND user_id_second=$2", callsTable)
+	row := tx.QueryRow(querySelect, userIdSecond, userIdFirst)
+	err = row.Scan(&count)
+	if err != nil {
+		tx.Rollback()
+		return model.Game{}, err
+	}
+
+	if count > 0 {
+		var call model.Call
+		query1 := fmt.Sprintf("DELETE FROM %s WHERE user_id_first=$1 AND user_id_second=$2", callsTable)
+		query2 := fmt.Sprintf("SELECT * FROM %s WHERE user_id_first=$1 AND user_id_second=$2 LIMIT 1", callsTable)
+		row1 := tx.QueryRow(query2, userIdSecond, userIdFirst)
+		err = row1.Scan(&call.Id, &call.UserIdFirst, &call.RoomIdFirst, &call.UserIdSecond)
+		if err != nil {
+			tx.Rollback()
+			return model.Game{}, err
+		}
+
+		_, err = tx.Exec(query1, userIdSecond, userIdFirst)
+
+		if err != nil {
+			tx.Rollback()
+			return model.Game{}, err
+		}
+
+		return model.Game{
+			UserIdFirst:  userIdFirst,
+			RoomIdFirst:  roomIdFirst,
+			UserIdSecond: userIdSecond,
+			RoomIdSecond: call.RoomIdFirst,
+		}, tx.Commit()
+	} else {
+		query1 := fmt.Sprintf("INSERT INTO %s (user_id_first, room_id_first, user_id_second) values ($1, $2, $3)",
+			callsTable)
+
+		_, err := tx.Exec(query1, userIdFirst, roomIdFirst, userIdSecond)
+
+		if err != nil {
+			tx.Rollback()
+			return model.Game{}, err
+		}
+
+		return model.Game{
+			UserIdFirst:  -1,
+			RoomIdFirst:  -1,
+			UserIdSecond: -1,
+			RoomIdSecond: -1,
+		}, tx.Commit()
+	}
+}
+
+func (g *GamePostgres) DeleteCall(userIdFirst, userIdSecond int) error {
+	query := fmt.Sprintf("DELETE FROM %s WHERE user_id_first=$1 AND user_id_second=$2", callsTable)
+	_, err := g.db.Exec(query, userIdFirst, userIdSecond)
+	return err
+}
+
 func (g *GamePostgres) GetListOfEdges(startRoomId int) ([]model.Edge, error) {
 	var edges []model.Edge
 

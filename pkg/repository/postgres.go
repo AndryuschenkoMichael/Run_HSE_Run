@@ -10,6 +10,7 @@ const (
 	friendsTable = "friends"
 	roomsTable   = "rooms"
 	edgesTable   = "edges"
+	callsTable   = "calls"
 )
 
 type Config struct {

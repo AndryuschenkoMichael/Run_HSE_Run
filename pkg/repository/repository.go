@@ -28,6 +28,8 @@ type Game interface {
 	GetEdge(startRoomId, endRoomId int) (model.Edge, error)
 	GetListOfEdges(startRoomId int) ([]model.Edge, error)
 	GetRoomById(roomId int) (model.Room, error)
+	AddCall(userIdFirst, userIdSecond, roomIdFirst int) (model.Game, error)
+	DeleteCall(userIdFirst, userIdSecond int) error
 }
 
 type Repository struct {

@@ -12,10 +12,6 @@ import (
 	"time"
 )
 
-type GameService struct {
-	repo *repository.Repository
-}
-
 const (
 	MaxRoomsInGame    = 10
 	MinLengthEdge     = 30.0
@@ -24,6 +20,18 @@ const (
 	PercentDispersion = 0.1
 	CountTries        = 30
 )
+
+type GameService struct {
+	repo *repository.Repository
+}
+
+func (g *GameService) DeleteCall(userIdFirst, userIdSecond int) error {
+	return g.repo.DeleteCall(userIdFirst, userIdSecond)
+}
+
+func (g *GameService) AddCall(userIdFirst, userIdSecond, roomIdFirst int) (model.Game, error) {
+	return g.repo.AddCall(userIdFirst, userIdSecond, roomIdFirst)
+}
 
 func (g *GameService) GenerateRoomsForGame(startUser1, startUser2, count,
 	campusId int) ([]model.Room, []model.Room, error) {

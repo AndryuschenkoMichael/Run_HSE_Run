@@ -45,6 +45,10 @@ func (h *Handler) InitRoutes() chi.Router {
 
 		router.Route("/game", func(router chi.Router) {
 			router.Get("/get-rooms-by-code", h.getRoomByCode)
+			router.Put("/put-in-queue", h.putInQueue)
+			router.Delete("/delete-from-queue", h.deleteFromQueue)
+			router.Put("/add-call", h.addCall)
+			router.Delete("/delete-call", h.deleteCall)
 		})
 	})
 

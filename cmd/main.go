@@ -47,14 +47,6 @@ func main() {
 	services := service.NewService(repositories, mailers)
 	handlers := handler.NewHandler(services)
 
-	rooms1, rooms2, err := services.GenerateRoomsForGame(647, 547, 3, 1)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	log.Println(rooms1)
-	log.Println(rooms2)
-
 	srv := new(runHse.Server)
 	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
 		log.Fatalf("Error in running server: %s", err.Error())

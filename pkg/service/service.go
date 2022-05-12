@@ -42,6 +42,14 @@ type Game interface {
 	GetDistanceBetweenRooms(startRoomId int, rooms []model.Room) (float64, error)
 	GenerateRoomsByDistance(startRoomId int, rooms []model.Room, distance float64) ([]model.Room, error)
 	GenerateRoomsForGame(startUser1, startUser2, count, campusId int) ([]model.Room, []model.Room, error)
+	AddCall(userIdFirst, userIdSecond, roomIdFirst int) (model.Game, error)
+	DeleteCall(userIdFirst, userIdSecond int) error
+}
+
+type Websocket interface {
+	AddUser(userId, roomId int)
+	Cancel(userId int)
+	SendGame(game model.Game) error
 }
 
 type Service struct {
@@ -50,6 +58,7 @@ type Service struct {
 	Friends
 	Users
 	Game
+	Websocket
 }
 
 func NewService(repo *repository.Repository, sender *mailer.Mailer) *Service {
@@ -59,5 +68,6 @@ func NewService(repo *repository.Repository, sender *mailer.Mailer) *Service {
 		Friends:       NewFriendsService(repo),
 		Users:         NewUsersService(repo),
 		Game:          NewGameService(repo),
+		Websocket:     NewWebsocketService(),
 	}
 }
