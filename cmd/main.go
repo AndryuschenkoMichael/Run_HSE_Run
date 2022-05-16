@@ -4,8 +4,10 @@ import (
 	runHse "Run_Hse_Run"
 	"Run_Hse_Run/pkg/handler"
 	"Run_Hse_Run/pkg/mailer"
+	"Run_Hse_Run/pkg/queue"
 	"Run_Hse_Run/pkg/repository"
 	"Run_Hse_Run/pkg/service"
+	"Run_Hse_Run/pkg/websocket"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
@@ -44,7 +46,9 @@ func main() {
 
 	mailers := mailer.NewMailer(dialer)
 	repositories := repository.NewRepository(db)
-	services := service.NewService(repositories, mailers)
+	queues := queue.NewQueue()
+	websockets := websocket.NewServer()
+	services := service.NewService(repositories, mailers, queues, websockets)
 	handlers := handler.NewHandler(services)
 
 	srv := new(runHse.Server)

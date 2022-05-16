@@ -3,11 +3,14 @@ package service
 import (
 	"Run_Hse_Run/pkg/logger"
 	"Run_Hse_Run/pkg/model"
+	"Run_Hse_Run/pkg/queue"
 	"Run_Hse_Run/pkg/repository"
+	"Run_Hse_Run/pkg/websocket"
 	"errors"
 	"fmt"
 	"math"
 	"math/rand"
+	"net/http"
 	"regexp"
 	"time"
 )
@@ -22,7 +25,26 @@ const (
 )
 
 type GameService struct {
-	repo *repository.Repository
+	repo      *repository.Repository
+	queue     *queue.Queue
+	websocket *websocket.Server
+}
+
+func (g *GameService) AddUser(userId, roomId int) {
+	g.queue.AddUser(userId, roomId)
+}
+
+func (g *GameService) Cancel(userId int) {
+	g.queue.Cancel(userId)
+}
+
+func (g *GameService) SendGame(game model.Game) error {
+	// implement me
+	return nil
+}
+
+func (g *GameService) UpgradeConnection(w http.ResponseWriter, r *http.Request) {
+	g.websocket.UpgradeConnection(w, r)
 }
 
 func (g *GameService) DeleteCall(userIdFirst, userIdSecond int) error {
@@ -33,7 +55,7 @@ func (g *GameService) AddCall(userIdFirst, userIdSecond, roomIdFirst int) (model
 	return g.repo.AddCall(userIdFirst, userIdSecond, roomIdFirst)
 }
 
-func (g *GameService) GenerateRoomsForGame(startUser1, startUser2, count,
+func (g *GameService) GenerateRoomsForGame(startRoom1, startRoom2, count,
 	campusId int) ([]model.Room, []model.Room, error) {
 	countErrors := 0
 	for i := 0; i < CountTries; i++ {
@@ -41,22 +63,14 @@ func (g *GameService) GenerateRoomsForGame(startUser1, startUser2, count,
 			return nil, nil, errors.New("can't generate rooms")
 		}
 
-		rooms1, err := g.GenerateRandomRooms(startUser1, count, campusId)
+		rooms1, err := g.GenerateRandomRooms(startRoom1, count, campusId)
 		if err != nil {
 			logger.WarningLogger.Println(err)
 			countErrors++
 			continue
 		}
 
-		distance1, err := g.GetDistanceBetweenRooms(startUser1, rooms1)
-
-		if err != nil {
-			logger.WarningLogger.Println(err)
-			countErrors++
-			continue
-		}
-
-		rooms2, err := g.GenerateRoomsByDistance(startUser2, rooms1, distance1)
+		distance1, err := g.GetDistanceBetweenRooms(startRoom1, rooms1)
 
 		if err != nil {
 			logger.WarningLogger.Println(err)
@@ -64,7 +78,15 @@ func (g *GameService) GenerateRoomsForGame(startUser1, startUser2, count,
 			continue
 		}
 
-		distance2, err := g.GetDistanceBetweenRooms(startUser2, rooms2)
+		rooms2, err := g.GenerateRoomsByDistance(startRoom2, rooms1, distance1)
+
+		if err != nil {
+			logger.WarningLogger.Println(err)
+			countErrors++
+			continue
+		}
+
+		distance2, err := g.GetDistanceBetweenRooms(startRoom2, rooms2)
 
 		if err != nil {
 			logger.WarningLogger.Println(err)
@@ -223,7 +245,24 @@ func (g *GameService) GetRoomByCodePattern(code string, campusId int) ([]model.R
 	return g.repo.GetRoomByCodePattern(code, campusId)
 }
 
-func NewGameService(repo *repository.Repository) *GameService {
+func (g *GameService) run() {
+	for value := range g.queue.GetGameChan() {
+		err := g.SendGame(value)
+		logger.WarningLogger.Printf("can't send game: %s", err.Error())
+	}
+}
+
+func NewGameService(repo *repository.Repository, queue *queue.Queue, websocket *websocket.Server) *GameService {
 	rand.Seed(time.Now().Unix())
-	return &GameService{repo: repo}
+
+	gameService := GameService{
+		repo:      repo,
+		queue:     queue,
+		websocket: websocket,
+	}
+
+	go gameService.queue.Start()
+	go gameService.run()
+
+	return &gameService
 }

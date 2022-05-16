@@ -3,6 +3,7 @@ package service
 import (
 	"Run_Hse_Run/pkg/mailer"
 	"Run_Hse_Run/pkg/model"
+	"Run_Hse_Run/pkg/queue"
 	"Run_Hse_Run/pkg/repository"
 	"Run_Hse_Run/pkg/websocket"
 	"net/http"
@@ -40,19 +41,11 @@ type Users interface {
 
 type Game interface {
 	GetRoomByCodePattern(code string, campusId int) ([]model.Room, error)
-	GenerateRandomRooms(startRoomId, count, campusId int) ([]model.Room, error)
-	GetDistanceBetweenRooms(startRoomId int, rooms []model.Room) (float64, error)
-	GenerateRoomsByDistance(startRoomId int, rooms []model.Room, distance float64) ([]model.Room, error)
-	GenerateRoomsForGame(startUser1, startUser2, count, campusId int) ([]model.Room, []model.Room, error)
 	AddCall(userIdFirst, userIdSecond, roomIdFirst int) (model.Game, error)
 	DeleteCall(userIdFirst, userIdSecond int) error
-}
-
-type Websocket interface {
 	AddUser(userId, roomId int)
 	Cancel(userId int)
 	SendGame(game model.Game) error
-	WriteJson(userId int, message interface{})
 	UpgradeConnection(w http.ResponseWriter, r *http.Request)
 }
 
@@ -62,16 +55,15 @@ type Service struct {
 	Friends
 	Users
 	Game
-	Websocket
 }
 
-func NewService(repo *repository.Repository, sender *mailer.Mailer, websocket *websocket.Server) *Service {
+func NewService(repo *repository.Repository, sender *mailer.Mailer,
+	queue *queue.Queue, websocket *websocket.Server) *Service {
 	return &Service{
 		Sender:        NewSenderService(sender),
 		Authorization: NewAuthService(repo),
 		Friends:       NewFriendsService(repo),
 		Users:         NewUsersService(repo),
-		Game:          NewGameService(repo),
-		Websocket:     NewWebsocketService(websocket),
+		Game:          NewGameService(repo, queue, websocket),
 	}
 }
