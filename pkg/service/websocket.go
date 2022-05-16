@@ -1,8 +1,9 @@
 package service
 
 import (
+	"Run_Hse_Run/pkg/logger"
 	"Run_Hse_Run/pkg/model"
-	"fmt"
+	"Run_Hse_Run/pkg/websocket"
 	"sync"
 )
 
@@ -11,6 +12,7 @@ type WebsocketService struct {
 	gameEntries map[int]*entry
 	requests    chan *entry
 	games       chan model.Game
+	*websocket.Server
 }
 
 func (w *WebsocketService) SendGame(game model.Game) error {
@@ -61,15 +63,17 @@ func (w *WebsocketService) Start() {
 
 func (w *WebsocketService) Run() {
 	for value := range w.games {
-		fmt.Println(value)
+		err := w.SendGame(value)
+		logger.WarningLogger.Printf("can't send game: %s", err.Error())
 	}
 }
 
-func NewWebsocketService() *WebsocketService {
+func NewWebsocketService(websocket *websocket.Server) *WebsocketService {
 	ws := &WebsocketService{
 		gameEntries: make(map[int]*entry),
 		requests:    make(chan *entry, 20),
 		games:       make(chan model.Game, 20),
+		Server:      websocket,
 	}
 
 	go ws.Start()

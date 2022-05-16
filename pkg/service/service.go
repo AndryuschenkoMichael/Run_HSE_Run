@@ -4,6 +4,8 @@ import (
 	"Run_Hse_Run/pkg/mailer"
 	"Run_Hse_Run/pkg/model"
 	"Run_Hse_Run/pkg/repository"
+	"Run_Hse_Run/pkg/websocket"
+	"net/http"
 	"sync"
 )
 
@@ -50,6 +52,8 @@ type Websocket interface {
 	AddUser(userId, roomId int)
 	Cancel(userId int)
 	SendGame(game model.Game) error
+	WriteJson(userId int, message interface{})
+	UpgradeConnection(w http.ResponseWriter, r *http.Request)
 }
 
 type Service struct {
@@ -61,13 +65,13 @@ type Service struct {
 	Websocket
 }
 
-func NewService(repo *repository.Repository, sender *mailer.Mailer) *Service {
+func NewService(repo *repository.Repository, sender *mailer.Mailer, websocket *websocket.Server) *Service {
 	return &Service{
 		Sender:        NewSenderService(sender),
 		Authorization: NewAuthService(repo),
 		Friends:       NewFriendsService(repo),
 		Users:         NewUsersService(repo),
 		Game:          NewGameService(repo),
-		Websocket:     NewWebsocketService(),
+		Websocket:     NewWebsocketService(websocket),
 	}
 }

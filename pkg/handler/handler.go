@@ -50,6 +50,8 @@ func (h *Handler) InitRoutes() chi.Router {
 			router.Put("/add-call", h.addCall)
 			router.Delete("/delete-call", h.deleteCall)
 		})
+
+		router.Post("/upgrade-connection", h.services.UpgradeConnection)
 	})
 
 	router.Get("/ping", func(writer http.ResponseWriter, request *http.Request) {
