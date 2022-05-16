@@ -18,8 +18,6 @@ func NewHandler(services *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() chi.Router {
 	router := chi.NewRouter()
-	// fix if I will use websocket
-	//router.Use(middleware.Logger, middleware.Timeout(time.Minute))
 	router.Use(middleware.Logger)
 
 	router.Route("/auth", func(router chi.Router) {

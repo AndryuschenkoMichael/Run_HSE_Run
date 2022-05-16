@@ -39,7 +39,14 @@ func (g *GameService) Cancel(userId int) {
 }
 
 func (g *GameService) SendGame(game model.Game) error {
-	// implement me
+	rooms1, rooms2, err := g.GenerateRoomsForGame(game.RoomIdFirst, game.RoomIdSecond, 3, 1)
+	if err != nil {
+		return err
+	}
+
+	g.websocket.WriteJson(game.UserIdFirst, rooms1)
+	g.websocket.WriteJson(game.UserIdSecond, rooms2)
+
 	return nil
 }
 
