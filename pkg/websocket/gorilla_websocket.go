@@ -46,6 +46,8 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 	for {
 		mt, _, err := connection.ReadMessage()
 
+		logger.WarningLogger.Printf("receive message type: %d", mt)
+
 		if err != nil || mt == websocket.CloseMessage {
 			break
 		}

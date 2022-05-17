@@ -20,6 +20,7 @@ func (u *UserQueue) AddUser(userId, roomId int) {
 	}
 
 	e = newEntry(userId, roomId)
+	u.gameEntries[userId] = e
 	u.Unlock()
 
 	u.requests <- e
