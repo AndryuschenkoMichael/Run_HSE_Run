@@ -255,7 +255,9 @@ func (g *GameService) GetRoomByCodePattern(code string, campusId int) ([]model.R
 func (g *GameService) run() {
 	for value := range g.queue.GetGameChan() {
 		err := g.SendGame(value)
-		logger.WarningLogger.Printf("can't send game: %s", err.Error())
+		if err != nil {
+			logger.WarningLogger.Printf("can't send game: %s", err.Error())
+		}
 	}
 }
 
