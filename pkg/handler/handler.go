@@ -47,7 +47,7 @@ func (h *Handler) InitRoutes() chi.Router {
 			router.Delete("/delete-from-queue", h.deleteFromQueue)
 			router.Put("/add-call", h.addCall)
 			router.Delete("/delete-call", h.deleteCall)
-			router.Put("/send-time", h.sendTime)
+			router.Put("/send-tim", h.sendTime)
 		})
 
 		router.Get("/upgrade-connection", h.services.UpgradeConnection)
