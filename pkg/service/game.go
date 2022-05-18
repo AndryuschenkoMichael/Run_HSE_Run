@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"net/http"
 	"regexp"
+	"sync"
 	"time"
 )
 
@@ -22,12 +23,155 @@ const (
 	MaxCountError     = 15
 	PercentDispersion = 0.1
 	CountTries        = 30
+	TimeOut           = 3 * time.Minute
+	TimeTick          = 10 * time.Second
+	InfTime           = 1000000
+)
+
+var (
+	mu           sync.Mutex
+	isSendResult = make(map[int]struct{})
 )
 
 type GameService struct {
 	repo      *repository.Repository
 	queue     *queue.Queue
 	websocket *websocket.Server
+}
+
+func (g *GameService) UpdateTime(gameId, userId, time int) error {
+	return g.repo.UpdateTime(gameId, userId, time)
+}
+
+func (g *GameService) SendResult(gameId, userIdFirst, timeUser1 int) {
+	game, err := g.repo.GetGame(gameId)
+	if err != nil {
+		return
+	}
+
+	userIdSecond := game.UserIdFirst
+	if userIdSecond == userIdFirst {
+		userIdSecond = game.UserIdSecond
+	}
+
+	mu.Lock()
+	if _, ok := isSendResult[gameId]; ok {
+		mu.Unlock()
+		return
+	}
+	mu.Unlock()
+
+	timer := time.NewTimer(TimeOut)
+	ticker := time.NewTicker(TimeTick)
+
+	for {
+		select {
+		case <-ticker.C:
+			timeUser2, err := g.repo.GetTime(gameId, userIdSecond)
+			if err != nil {
+				logger.WarningLogger.Printf("can't get user time %s", err.Error())
+				continue
+			}
+
+			mu.Lock()
+			if _, ok := isSendResult[gameId]; ok {
+				mu.Unlock()
+				return
+			}
+			mu.Unlock()
+
+			if timeUser2.Time == -1 {
+				continue
+			}
+
+			message1 := struct {
+				GameResult string `json:"game_result"`
+			}{}
+
+			message2 := struct {
+				GameResult string `json:"game_result"`
+			}{}
+
+			if timeUser1 == timeUser2.Time {
+				message1.GameResult = "DRAW"
+				message2.GameResult = "DRAW"
+			} else if timeUser1 < timeUser2.Time {
+				message1.GameResult = "WIN"
+				message2.GameResult = "LOSE"
+			} else {
+				message1.GameResult = "LOSE"
+				message2.GameResult = "WIN"
+			}
+
+			mu.Lock()
+			if _, ok := isSendResult[gameId]; ok {
+				mu.Unlock()
+				return
+			}
+
+			wg := sync.WaitGroup{}
+			wg.Add(2)
+
+			isSendResult[gameId] = struct{}{}
+			mu.Unlock()
+
+			go func() {
+				g.websocket.WriteJson(game.UserIdFirst, message1)
+				wg.Done()
+			}()
+
+			go func() {
+				g.websocket.WriteJson(game.UserIdSecond, message2)
+				wg.Done()
+			}()
+
+			wg.Wait()
+
+			return
+		case <-timer.C:
+			message1 := struct {
+				GameResult string `json:"game_result"`
+			}{}
+
+			message2 := struct {
+				GameResult string `json:"game_result"`
+			}{}
+
+			if timeUser1 == InfTime {
+				message1.GameResult = "DRAW"
+				message2.GameResult = "DRAW"
+			} else {
+				message1.GameResult = "WIN"
+				message2.GameResult = "LOSE"
+			}
+
+			mu.Lock()
+			if _, ok := isSendResult[gameId]; ok {
+				mu.Unlock()
+				return
+			}
+
+			wg := sync.WaitGroup{}
+			wg.Add(2)
+
+			isSendResult[gameId] = struct{}{}
+			mu.Unlock()
+
+			go func() {
+				g.websocket.WriteJson(game.UserIdFirst, message1)
+				wg.Done()
+			}()
+
+			go func() {
+				g.websocket.WriteJson(game.UserIdSecond, message2)
+				wg.Done()
+			}()
+
+			wg.Wait()
+
+			return
+		}
+	}
 }
 
 func (g *GameService) AddUser(userId, roomId int) {
@@ -44,8 +188,65 @@ func (g *GameService) SendGame(game model.Game) error {
 		return err
 	}
 
-	g.websocket.WriteJson(game.UserIdFirst, rooms1)
-	g.websocket.WriteJson(game.UserIdSecond, rooms2)
+	id, err := g.repo.AddGame(game.UserIdFirst, game.UserIdSecond)
+	if err != nil {
+		return err
+	}
+
+	user1, err := g.repo.GetUserById(game.UserIdFirst)
+	if err != nil {
+		return err
+	}
+
+	user2, err := g.repo.GetUserById(game.UserIdSecond)
+	if err != nil {
+		return err
+	}
+
+	err = g.repo.AddTime(id, game.UserIdFirst, -1)
+	if err != nil {
+		return err
+	}
+
+	err = g.repo.AddTime(id, game.UserIdSecond, -1)
+	if err != nil {
+		return err
+	}
+
+	gameInfo1 := struct {
+		Nickname string       `json:"nickname"`
+		GameId   int          `json:"game_id"`
+		Rooms    []model.Room `json:"rooms"`
+	}{
+		Nickname: user1.Nickname,
+		GameId:   id,
+		Rooms:    rooms1,
+	}
+
+	gameInfo2 := struct {
+		Nickname string       `json:"nickname"`
+		GameId   int          `json:"game_id"`
+		Rooms    []model.Room `json:"rooms"`
+	}{
+		Nickname: user2.Nickname,
+		GameId:   id,
+		Rooms:    rooms2,
+	}
+
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		g.websocket.WriteJson(game.UserIdFirst, gameInfo1)
+		wg.Done()
+	}()
+
+	go func() {
+		g.websocket.WriteJson(game.UserIdSecond, gameInfo2)
+		wg.Done()
+	}()
+
+	wg.Wait()
 
 	return nil
 }

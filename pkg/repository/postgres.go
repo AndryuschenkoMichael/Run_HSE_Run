@@ -11,6 +11,8 @@ const (
 	roomsTable   = "rooms"
 	edgesTable   = "edges"
 	callsTable   = "calls"
+	gamesTable   = "games"
+	timesTable   = "times"
 )
 
 type Config struct {

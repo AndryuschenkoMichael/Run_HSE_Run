@@ -47,6 +47,8 @@ type Game interface {
 	Cancel(userId int)
 	SendGame(game model.Game) error
 	UpgradeConnection(w http.ResponseWriter, r *http.Request)
+	SendResult(gameId, userId, time int)
+	UpdateTime(gameId, userId, time int) error
 }
 
 type Service struct {

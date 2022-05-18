@@ -4,6 +4,7 @@ import (
 	"Run_Hse_Run/pkg/logger"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"time"
 )
 
 var upgrader = websocket.Upgrader{
@@ -12,18 +13,32 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+const timeOut = 3 * time.Minute
+
 type GorillaServer struct {
 	clients map[int]*websocket.Conn
 }
 
 func (g *GorillaServer) WriteJson(userId int, message interface{}) {
-	connection, ok := g.clients[userId]
-	if !ok {
-		logger.WarningLogger.Println("connection doesn't exist")
-		return
+	timer := time.NewTimer(timeOut)
+	for {
+		select {
+		case <-timer.C:
+			logger.WarningLogger.Println("time out of write json")
+			return
+		default:
+			connection, ok := g.clients[userId]
+			if !ok {
+				logger.WarningLogger.Println("connection doesn't exist")
+			} else {
+				if err := connection.WriteJSON(message); err == nil {
+					return
+				} else {
+					logger.WarningLogger.Printf("connection was lost: %s", err.Error())
+				}
+			}
+		}
 	}
-
-	_ = connection.WriteJSON(message)
 }
 
 func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request) {
@@ -39,6 +54,13 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 	}
 
 	defer connection.Close()
+
+	if con, ok := g.clients[userId]; ok {
+		err := con.Close()
+		if err != nil {
+			logger.WarningLogger.Printf("can't close websocket: %s", err.Error())
+		}
+	}
 
 	g.clients[userId] = connection
 	defer delete(g.clients, userId)

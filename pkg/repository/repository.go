@@ -30,6 +30,11 @@ type Game interface {
 	GetRoomById(roomId int) (model.Room, error)
 	AddCall(userIdFirst, userIdSecond, roomIdFirst int) (model.Game, error)
 	DeleteCall(userIdFirst, userIdSecond int) error
+	GetGame(gameId int) (model.GameUsers, error)
+	GetTime(gameId, userId int) (model.Time, error)
+	AddGame(userIdFirst, userIdSecond int) (int, error)
+	AddTime(gameId, userId, time int) error
+	UpdateTime(gameId, userId, time int) error
 }
 
 type Repository struct {
