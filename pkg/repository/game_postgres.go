@@ -11,6 +11,47 @@ type GamePostgres struct {
 	db *sqlx.DB
 }
 
+func (g *GamePostgres) GetGame(gameId int) (model.GameUsers, error) {
+	var game model.GameUsers
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1", gamesTable)
+	err := g.db.Get(&game, query, gameId)
+
+	return game, err
+}
+
+func (g *GamePostgres) GetTime(gameId, userId int) (model.Time, error) {
+	var time model.Time
+	query := fmt.Sprintf("SELECT * FROM %s WHERE game_id=$1 AND user_id=$2", timesTable)
+	err := g.db.Get(&time, query, gameId, userId)
+
+	return time, err
+}
+
+func (g *GamePostgres) AddGame(userIdFirst, userIdSecond int) (int, error) {
+	var id int
+	query := fmt.Sprintf("INSERT INTO %s (user_id_first, user_id_second) values ($1, $2) RETURNING id", gamesTable)
+	row := g.db.QueryRow(query, userIdFirst, userIdSecond)
+	if err := row.Scan(&id); err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func (g *GamePostgres) AddTime(gameId, userId, time int) error {
+	query := fmt.Sprintf("INSERT INTO %s (game_id, user_id, time) values ($1, $2, $3)", timesTable)
+	_, err := g.db.Exec(query, gameId, userId, time)
+
+	return err
+}
+
+func (g *GamePostgres) UpdateTime(gameId, userId, time int) error {
+	query := fmt.Sprintf("UPDATE %s SET time = $1 WHERE game_id = $2 AND user_id = $3", timesTable)
+	_, err := g.db.Exec(query, time, gameId, userId)
+
+	return err
+}
+
 func (g *GamePostgres) GetRoomById(roomId int) (model.Room, error) {
 	var room model.Room
 	query := fmt.Sprintf(`SELECT * FROM %s rm WHERE rm.id = $1`, roomsTable)
