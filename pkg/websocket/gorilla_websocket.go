@@ -57,8 +57,6 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 		logger.WarningLogger.Printf("can't upgrade connection: %s", err.Error())
 	}
 
-	defer connection.Close()
-
 	if con, ok := g.clients[userId]; ok {
 		err := con.Close()
 		if err != nil {
