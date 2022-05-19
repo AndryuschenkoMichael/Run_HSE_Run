@@ -58,6 +58,8 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	logger.WarningLogger.Printf("user with id = %d try to connect by web socket", userId)
+
 	connection, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		logger.WarningLogger.Printf("can't upgrade connection: %s", err.Error())
@@ -101,6 +103,8 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 			err := con.WriteMessage(websocket.PongMessage, []byte{})
 			if err != nil {
 				logger.WarningLogger.Printf("connection lost: %s", err.Error())
+				g.RUnlock()
+				break
 			}
 
 			g.RUnlock()
