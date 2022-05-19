@@ -17,6 +17,7 @@ var upgrader = websocket.Upgrader{
 const (
 	timeOut        = 3 * time.Minute
 	timeQueryAgain = time.Second
+	UserId         = "UserId"
 )
 
 type GorillaServer struct {
@@ -51,7 +52,7 @@ func (g *GorillaServer) WriteJson(userId int, message interface{}) {
 }
 
 func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request) {
-	userId, ok := r.Context().Value("UserId").(int)
+	userId, ok := r.Context().Value(UserId).(int)
 	if !ok {
 		logger.WarningLogger.Println("invalid context")
 		return
