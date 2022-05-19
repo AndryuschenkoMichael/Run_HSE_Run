@@ -24,7 +24,7 @@ const (
 	PercentDispersion = 0.1
 	CountTries        = 30
 	TimeOut           = 3 * time.Minute
-	TimeTick          = 10 * time.Second
+	TimeTick          = time.Second
 	InfTime           = 1000000
 )
 
