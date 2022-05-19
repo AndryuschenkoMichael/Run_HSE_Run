@@ -4,6 +4,7 @@ import (
 	"Run_Hse_Run/pkg/logger"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -19,6 +20,7 @@ const (
 )
 
 type GorillaServer struct {
+	sync.RWMutex
 	clients map[int]*websocket.Conn
 }
 
@@ -31,16 +33,19 @@ func (g *GorillaServer) WriteJson(userId int, message interface{}) {
 			logger.WarningLogger.Println("time out of write json")
 			return
 		case <-ticker.C:
+			g.RLock()
 			connection, ok := g.clients[userId]
 			if !ok {
 				logger.WarningLogger.Println("connection doesn't exist")
 			} else {
 				if err := connection.WriteJSON(message); err == nil {
+					g.RUnlock()
 					return
 				} else {
 					logger.WarningLogger.Printf("connection was lost: %s", err.Error())
 				}
 			}
+			g.RUnlock()
 		}
 	}
 }
@@ -57,6 +62,7 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 		logger.WarningLogger.Printf("can't upgrade connection: %s", err.Error())
 	}
 
+	g.Lock()
 	if con, ok := g.clients[userId]; ok {
 		err := con.Close()
 		if err != nil {
@@ -65,9 +71,17 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 	}
 
 	g.clients[userId] = connection
+	g.Unlock()
 
 	for {
-		mt, _, err := connection.ReadMessage()
+		g.RLock()
+		con, ok := g.clients[userId]
+		if !ok {
+			g.RUnlock()
+			break
+		}
+		mt, _, err := con.ReadMessage()
+		g.RUnlock()
 
 		logger.WarningLogger.Printf("receive message type: %d", mt)
 
@@ -76,11 +90,19 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 		}
 
 		if mt == websocket.PingMessage {
-			err := connection.WriteMessage(websocket.PongMessage, []byte{})
-			if err != nil {
-				logger.WarningLogger.Printf("connection lost: %s", err.Error())
+			g.RLock()
+			con, ok := g.clients[userId]
+			if !ok {
+				g.RUnlock()
 				break
 			}
+
+			err := con.WriteMessage(websocket.PongMessage, []byte{})
+			if err != nil {
+				logger.WarningLogger.Printf("connection lost: %s", err.Error())
+			}
+
+			g.RUnlock()
 		}
 	}
 }
