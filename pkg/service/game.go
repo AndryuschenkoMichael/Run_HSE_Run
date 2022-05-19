@@ -78,11 +78,8 @@ func (g *GameService) SendResult(gameId, userIdFirst, timeUser1 int) {
 				mu.Unlock()
 				return
 			}
-			mu.Unlock()
 
-			if timeUser2.Time == -1 {
-				continue
-			}
+			mu.Unlock()
 
 			message1 := struct {
 				GameResult string `json:"game_result"`
@@ -92,15 +89,24 @@ func (g *GameService) SendResult(gameId, userIdFirst, timeUser1 int) {
 				GameResult string `json:"game_result"`
 			}{}
 
-			if timeUser1 == timeUser2.Time {
-				message1.GameResult = "DRAW"
-				message2.GameResult = "DRAW"
-			} else if timeUser1 < timeUser2.Time {
-				message1.GameResult = "WIN"
-				message2.GameResult = "LOSE"
-			} else {
+			if timeUser1 == InfTime {
 				message1.GameResult = "LOSE"
 				message2.GameResult = "WIN"
+			} else {
+				if timeUser2.Time == -1 {
+					continue
+				}
+
+				if timeUser1 == timeUser2.Time {
+					message1.GameResult = "DRAW"
+					message2.GameResult = "DRAW"
+				} else if timeUser1 < timeUser2.Time {
+					message1.GameResult = "WIN"
+					message2.GameResult = "LOSE"
+				} else {
+					message1.GameResult = "LOSE"
+					message2.GameResult = "WIN"
+				}
 			}
 
 			mu.Lock()
@@ -116,12 +122,12 @@ func (g *GameService) SendResult(gameId, userIdFirst, timeUser1 int) {
 			mu.Unlock()
 
 			go func() {
-				g.websocket.WriteJson(game.UserIdFirst, message1)
+				g.websocket.WriteJson(userIdFirst, message1)
 				wg.Done()
 			}()
 
 			go func() {
-				g.websocket.WriteJson(game.UserIdSecond, message2)
+				g.websocket.WriteJson(userIdSecond, message2)
 				wg.Done()
 			}()
 
@@ -158,12 +164,12 @@ func (g *GameService) SendResult(gameId, userIdFirst, timeUser1 int) {
 			mu.Unlock()
 
 			go func() {
-				g.websocket.WriteJson(game.UserIdFirst, message1)
+				g.websocket.WriteJson(userIdFirst, message1)
 				wg.Done()
 			}()
 
 			go func() {
-				g.websocket.WriteJson(game.UserIdSecond, message2)
+				g.websocket.WriteJson(userIdSecond, message2)
 				wg.Done()
 			}()
 
