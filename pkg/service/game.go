@@ -218,7 +218,7 @@ func (g *GameService) SendGame(game model.Game) error {
 		GameId   int          `json:"game_id"`
 		Rooms    []model.Room `json:"rooms"`
 	}{
-		Nickname: user1.Nickname,
+		Nickname: user2.Nickname,
 		GameId:   id,
 		Rooms:    rooms1,
 	}
@@ -228,7 +228,7 @@ func (g *GameService) SendGame(game model.Game) error {
 		GameId   int          `json:"game_id"`
 		Rooms    []model.Room `json:"rooms"`
 	}{
-		Nickname: user2.Nickname,
+		Nickname: user1.Nickname,
 		GameId:   id,
 		Rooms:    rooms2,
 	}
