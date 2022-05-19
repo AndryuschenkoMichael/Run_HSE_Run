@@ -13,7 +13,10 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-const timeOut = 3 * time.Minute
+const (
+	timeOut        = 3 * time.Minute
+	timeQueryAgain = time.Second
+)
 
 type GorillaServer struct {
 	clients map[int]*websocket.Conn
@@ -21,12 +24,13 @@ type GorillaServer struct {
 
 func (g *GorillaServer) WriteJson(userId int, message interface{}) {
 	timer := time.NewTimer(timeOut)
+	ticker := time.NewTicker(timeQueryAgain)
 	for {
 		select {
 		case <-timer.C:
 			logger.WarningLogger.Println("time out of write json")
 			return
-		default:
+		case <-ticker.C:
 			connection, ok := g.clients[userId]
 			if !ok {
 				logger.WarningLogger.Println("connection doesn't exist")
@@ -63,7 +67,6 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 	}
 
 	g.clients[userId] = connection
-	defer delete(g.clients, userId)
 
 	for {
 		mt, _, err := connection.ReadMessage()
