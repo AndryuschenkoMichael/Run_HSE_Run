@@ -21,7 +21,7 @@ const (
 )
 
 type GorillaServer struct {
-	sync.RWMutex
+	sync.Mutex
 	clients map[int]*websocket.Conn
 }
 
@@ -74,14 +74,11 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 	g.Unlock()
 
 	for {
-		g.RLock()
 		con, ok := g.clients[userId]
 		if !ok {
-			g.RUnlock()
 			break
 		}
 		mt, _, err := con.ReadMessage()
-		g.RUnlock()
 
 		logger.WarningLogger.Printf("receive message type: %d", mt)
 
@@ -90,21 +87,17 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 		}
 
 		if mt == websocket.PingMessage {
-			g.RLock()
 			con, ok := g.clients[userId]
 			if !ok {
-				g.RUnlock()
 				break
 			}
 
 			err := con.WriteMessage(websocket.PongMessage, []byte{})
 			if err != nil {
 				logger.WarningLogger.Printf("connection lost: %s", err.Error())
-				g.RUnlock()
 				break
 			}
 
-			g.RUnlock()
 		}
 	}
 }
