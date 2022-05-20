@@ -63,7 +63,7 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 	}
 
 	g.Lock()
-	if con, ok := g.clients[userId]; ok {
+	if con, ok := g.clients[userId]; ok && con != nil {
 		err := con.Close()
 		if err != nil {
 			logger.WarningLogger.Printf("can't close websocket: %s", err.Error())
@@ -81,7 +81,7 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 
 	for {
 		con, ok := g.clients[userId]
-		if !ok {
+		if !ok || con == nil {
 			break
 		}
 		mt, _, err := con.ReadMessage()
@@ -94,7 +94,7 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 
 		if mt == websocket.PingMessage {
 			con, ok := g.clients[userId]
-			if !ok {
+			if !ok || con == nil {
 				break
 			}
 
