@@ -189,6 +189,10 @@ func (g *GameService) Cancel(userId int) {
 }
 
 func (g *GameService) SendGame(game model.Game) error {
+	if game.UserIdFirst == game.UserIdSecond {
+		return errors.New("invalid game")
+	}
+
 	rooms1, rooms2, err := g.GenerateRoomsForGame(game.RoomIdFirst, game.RoomIdSecond, 3, 1)
 	if err != nil {
 		return err
@@ -253,6 +257,8 @@ func (g *GameService) SendGame(game model.Game) error {
 	}()
 
 	wg.Wait()
+
+	logger.WarningLogger.Printf("send game by users with id1 = %d, id2 = %d", game.UserIdFirst, game.UserIdFirst)
 
 	return nil
 }
