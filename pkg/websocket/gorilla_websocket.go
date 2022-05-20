@@ -35,7 +35,7 @@ func (g *GorillaServer) WriteJson(userId int, message interface{}) {
 			return
 		case <-ticker.C:
 			connection, ok := g.clients[userId]
-			if !ok {
+			if !ok || connection == nil {
 				logger.WarningLogger.Println("connection doesn't exist")
 			} else {
 				if err := connection.WriteJSON(message); err == nil {
