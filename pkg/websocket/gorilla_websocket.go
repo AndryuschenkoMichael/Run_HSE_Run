@@ -73,6 +73,12 @@ func (g *GorillaServer) UpgradeConnection(w http.ResponseWriter, r *http.Request
 	g.clients[userId] = connection
 	g.Unlock()
 
+	defer func() {
+		g.Lock()
+		delete(g.clients, userId)
+		g.Unlock()
+	}()
+
 	for {
 		con, ok := g.clients[userId]
 		if !ok {

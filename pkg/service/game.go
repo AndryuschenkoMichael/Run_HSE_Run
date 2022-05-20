@@ -258,7 +258,7 @@ func (g *GameService) SendGame(game model.Game) error {
 
 	wg.Wait()
 
-	logger.WarningLogger.Printf("send game by users with id1 = %d, id2 = %d", game.UserIdFirst, game.UserIdFirst)
+	logger.WarningLogger.Printf("send game by users with id1 = %d, id2 = %d", game.UserIdFirst, game.UserIdSecond)
 
 	return nil
 }
