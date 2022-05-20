@@ -34,19 +34,16 @@ func (g *GorillaServer) WriteJson(userId int, message interface{}) {
 			logger.WarningLogger.Println("time out of write json")
 			return
 		case <-ticker.C:
-			g.RLock()
 			connection, ok := g.clients[userId]
 			if !ok {
 				logger.WarningLogger.Println("connection doesn't exist")
 			} else {
 				if err := connection.WriteJSON(message); err == nil {
-					g.RUnlock()
 					return
 				} else {
 					logger.WarningLogger.Printf("connection was lost: %s", err.Error())
 				}
 			}
-			g.RUnlock()
 		}
 	}
 }
