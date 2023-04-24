@@ -26,7 +26,7 @@ func (h *Handler) sendEmail(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
-	if err := h.services.SendEmail(email.Email); err != nil {
+	if err := h.senderSvc.SendEmail(email.Email); err != nil {
 		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -56,7 +56,7 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := h.services.GetUser(auth.Email)
+	_, err := h.authSvc.GetUser(auth.Email)
 	if err == nil {
 		logger.WarningLogger.Println("user already exist")
 		w.WriteHeader(http.StatusConflict)
@@ -69,7 +69,7 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
 		Image:    auth.Image,
 	}
 
-	id, err := h.services.CreateUser(user)
+	id, err := h.authSvc.CreateUser(user)
 
 	if err != nil {
 		logger.WarningLogger.Println(err)
@@ -83,7 +83,7 @@ func (h *Handler) createUser(w http.ResponseWriter, r *http.Request) {
 
 	user.Id = id
 
-	token, err := h.services.GenerateToken(auth.Email)
+	token, err := h.authSvc.GenerateToken(auth.Email)
 	if err != nil {
 		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -140,14 +140,14 @@ func (h *Handler) checkAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.services.GetUser(auth.Email)
+	user, err := h.authSvc.GetUser(auth.Email)
 	if err != nil {
 		logger.WarningLogger.Println("user doesn't exist in db")
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	token, err := h.services.GenerateToken(auth.Email)
+	token, err := h.authSvc.GenerateToken(auth.Email)
 	if err != nil {
 		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusBadRequest)

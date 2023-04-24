@@ -1,17 +1,24 @@
 package mailer
 
-import "gopkg.in/gomail.v2"
+import (
+	"github.com/spf13/viper"
+	"gopkg.in/gomail.v2"
+)
 
-type Sender interface {
-	SendEmail(email string, text string) error
+type EmailSender struct {
+	dialer *gomail.Dialer
 }
 
-type Mailer struct {
-	Sender
+func NewEmailSender(dialer *gomail.Dialer) *EmailSender {
+	return &EmailSender{dialer: dialer}
 }
 
-func NewMailer(dialer *gomail.Dialer) *Mailer {
-	return &Mailer{
-		Sender: NewSendEmail(dialer),
-	}
+func (s *EmailSender) SendEmail(email string, text string) error {
+	message := gomail.NewMessage()
+	message.SetHeader("From", viper.GetString("mailer.email"))
+	message.SetHeader("To", email)
+	message.SetHeader("Subject", "Authorization in \"Run, Hse, Run\"")
+	message.SetBody("text/html", text)
+
+	return s.dialer.DialAndSend(message)
 }

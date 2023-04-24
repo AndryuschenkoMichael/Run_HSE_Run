@@ -2,11 +2,10 @@ package service
 
 import (
 	"Run_Hse_Run/pkg/model"
-	"Run_Hse_Run/pkg/repository"
 )
 
 type FriendsService struct {
-	repo *repository.Repository
+	repo FriendsRepository
 }
 
 func (f *FriendsService) AddFriend(userIdFrom, userIdTo int) error {
@@ -29,6 +28,6 @@ func (f *FriendsService) GetFriends(userId int) ([]model.User, error) {
 	return f.repo.GetFriends(userId)
 }
 
-func NewFriendsService(repo *repository.Repository) *FriendsService {
+func NewFriendsService(repo FriendsRepository) *FriendsService {
 	return &FriendsService{repo: repo}
 }

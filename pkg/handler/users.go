@@ -16,7 +16,7 @@ func (h *Handler) getUserById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.services.GetUserById(userId)
+	user, err := h.usersSvc.GetUserById(userId)
 	if err != nil {
 		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusNotFound)
@@ -31,7 +31,7 @@ func (h *Handler) getUserById(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) getUserByNickname(w http.ResponseWriter, r *http.Request) {
 	nickname := r.URL.Query().Get("nickname")
 
-	users, err := h.services.GetUsersByNicknamePattern(nickname)
+	users, err := h.usersSvc.GetUsersByNicknamePattern(nickname)
 	if err != nil {
 		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusNotFound)
@@ -63,7 +63,7 @@ func (h *Handler) changeNickname(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.services.RenameUser(userId, newNickname.Nickname)
+	err := h.usersSvc.RenameUser(userId, newNickname.Nickname)
 
 	if err != nil {
 		logger.WarningLogger.Println(err)
@@ -98,7 +98,7 @@ func (h *Handler) changeProfileImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.services.ChangeProfileImage(userId, profileImage.Image)
+	err := h.usersSvc.ChangeProfileImage(userId, profileImage.Image)
 
 	if err != nil {
 		logger.WarningLogger.Println(err)
@@ -117,7 +117,7 @@ func (h *Handler) getMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.services.GetUserById(userId)
+	user, err := h.usersSvc.GetUserById(userId)
 	if err != nil {
 		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusNotFound)

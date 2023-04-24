@@ -4,7 +4,6 @@ import (
 	runHse "Run_Hse_Run"
 	"Run_Hse_Run/pkg/handler"
 	"Run_Hse_Run/pkg/mailer"
-	"Run_Hse_Run/pkg/queue"
 	"Run_Hse_Run/pkg/repository"
 	"Run_Hse_Run/pkg/service"
 	"Run_Hse_Run/pkg/websocket"
@@ -44,15 +43,24 @@ func main() {
 		log.Fatalf("Faild to initialize db: %s", err.Error())
 	}
 
-	mailers := mailer.NewMailer(dialer)
-	repositories := repository.NewRepository(db)
-	queues := queue.NewQueue()
-	websockets := websocket.NewServer()
-	services := service.NewService(repositories, mailers, queues, websockets)
-	handlers := handler.NewHandler(services)
+	authRepo := repository.NewAuthPostgres(db)
+	gameRepo := repository.NewGamePostgres(db)
+	userRepo := repository.NewUsersPostgres(db)
+	friendsRepo := repository.NewFriendPostgres(db)
+
+	mailers := mailer.NewEmailSender(dialer)
+	websockets := websocket.NewGorillaServer()
+
+	authSvc := service.NewAuthService(authRepo)
+	userSvc := service.NewUsersService(userRepo)
+	gameSvc := service.NewGameService(gameRepo, websockets, userSvc)
+	senderSvc := service.NewSenderService(mailers)
+	friendsSvc := service.NewFriendsService(friendsRepo)
+
+	h := handler.NewHandler(authSvc, friendsSvc, gameSvc, senderSvc, userSvc)
 
 	srv := new(runHse.Server)
-	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+	if err := srv.Run(viper.GetString("port"), h.NewMuxRoutes()); err != nil {
 		log.Fatalf("Error in running server: %s", err.Error())
 	}
 }

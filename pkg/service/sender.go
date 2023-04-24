@@ -1,7 +1,6 @@
 package service
 
 import (
-	"Run_Hse_Run/pkg/mailer"
 	"bytes"
 	"html/template"
 	"log"
@@ -10,7 +9,7 @@ import (
 )
 
 type SenderService struct {
-	sender *mailer.Mailer
+	sender SenderMailer
 }
 
 func (s *SenderService) SendEmail(email string) error {
@@ -35,7 +34,7 @@ func (s *SenderService) SendEmail(email string) error {
 	return s.sender.SendEmail(email, buffer.String())
 }
 
-func NewSenderService(sender *mailer.Mailer) *SenderService {
+func NewSenderService(sender SenderMailer) *SenderService {
 	rand.Seed(time.Now().Unix())
 	return &SenderService{sender: sender}
 }

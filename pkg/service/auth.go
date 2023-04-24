@@ -2,7 +2,6 @@ package service
 
 import (
 	"Run_Hse_Run/pkg/model"
-	"Run_Hse_Run/pkg/repository"
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
@@ -17,7 +16,7 @@ const (
 )
 
 type AuthService struct {
-	repo *repository.Repository
+	repo AuthorizationRepository
 }
 
 func (a *AuthService) CreateUser(user model.User) (int, error) {
@@ -46,7 +45,7 @@ func (a *AuthService) GetUser(email string) (model.User, error) {
 	return a.repo.GetUser(email)
 }
 
-func NewAuthService(repo *repository.Repository) *AuthService {
+func NewAuthService(repo AuthorizationRepository) *AuthService {
 	return &AuthService{repo: repo}
 }
 
