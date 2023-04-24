@@ -4,8 +4,6 @@ import (
 	"Run_Hse_Run/pkg/logger"
 	"Run_Hse_Run/pkg/model"
 	"Run_Hse_Run/pkg/queue"
-	"Run_Hse_Run/pkg/repository"
-	"Run_Hse_Run/pkg/websocket"
 	"errors"
 	"fmt"
 	"math"
@@ -34,9 +32,10 @@ var (
 )
 
 type GameService struct {
-	repo      *repository.Repository
-	queue     *queue.Queue
-	websocket *websocket.Server
+	usersSvc  GameUsersService
+	repo      GameRepository
+	websocket GameWebsocket
+	queue     *queue.UserQueue
 }
 
 func (g *GameService) UpdateTime(gameId, userId, time int) error {
@@ -203,12 +202,12 @@ func (g *GameService) SendGame(game model.Game) error {
 		return err
 	}
 
-	user1, err := g.repo.GetUserById(game.UserIdFirst)
+	user1, err := g.usersSvc.GetUserById(game.UserIdFirst)
 	if err != nil {
 		return err
 	}
 
-	user2, err := g.repo.GetUserById(game.UserIdSecond)
+	user2, err := g.usersSvc.GetUserById(game.UserIdSecond)
 	if err != nil {
 		return err
 	}
@@ -474,13 +473,15 @@ func (g *GameService) run() {
 	}
 }
 
-func NewGameService(repo *repository.Repository, queue *queue.Queue, websocket *websocket.Server) *GameService {
+func NewGameService(repo GameRepository,
+	websocket GameWebsocket, userSvc GameUsersService) *GameService {
 	rand.Seed(time.Now().Unix())
 
 	gameService := GameService{
 		repo:      repo,
-		queue:     queue,
+		queue:     queue.NewUserQueue(),
 		websocket: websocket,
+		usersSvc:  userSvc,
 	}
 
 	go gameService.queue.Start()

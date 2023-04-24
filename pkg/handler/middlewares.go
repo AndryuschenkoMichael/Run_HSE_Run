@@ -24,13 +24,13 @@ func (h *Handler) authorizationOnly(next http.Handler) http.Handler {
 			return
 		}
 
-		userId, err := h.services.ParseToken(tokenString[1])
+		userId, err := h.authSvc.ParseToken(tokenString[1])
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		if _, err := h.services.GetUserById(userId); err != nil {
+		if _, err := h.usersSvc.GetUserById(userId); err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

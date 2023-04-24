@@ -27,13 +27,13 @@ func (h *Handler) sendTime(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.services.UpdateTime(gameInfo.GameId, userId, gameInfo.Time); err != nil {
+	if err := h.gameSvc.UpdateTime(gameInfo.GameId, userId, gameInfo.Time); err != nil {
 		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	go h.services.SendResult(gameInfo.GameId, userId, gameInfo.Time)
+	go h.gameSvc.SendResult(gameInfo.GameId, userId, gameInfo.Time)
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -41,7 +41,7 @@ func (h *Handler) sendTime(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) getRoomByCode(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 
-	rooms, err := h.services.GetRoomByCodePattern(code, 1)
+	rooms, err := h.gameSvc.GetRoomByCodePattern(code, 1)
 	if err != nil {
 		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusNotFound)
@@ -73,7 +73,7 @@ func (h *Handler) putInQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.services.AddUser(userId, roomId.RoomId)
+	h.gameSvc.AddUser(userId, roomId.RoomId)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -85,7 +85,7 @@ func (h *Handler) deleteFromQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.services.Cancel(userId)
+	h.gameSvc.Cancel(userId)
 
 	w.WriteHeader(http.StatusNoContent)
 }
@@ -111,7 +111,7 @@ func (h *Handler) addCall(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	game, err := h.services.AddCall(userIdFirst, call.UserIdSecond, call.RoomIdFirst)
+	game, err := h.gameSvc.AddCall(userIdFirst, call.UserIdSecond, call.RoomIdFirst)
 	if err != nil {
 		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusNotFound)
@@ -123,7 +123,7 @@ func (h *Handler) addCall(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.services.SendGame(game)
+	err = h.gameSvc.SendGame(game)
 
 	if err != nil {
 		logger.WarningLogger.Println(err)
@@ -154,7 +154,7 @@ func (h *Handler) deleteCall(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.services.DeleteCall(userIdFirst, call.UserIdSecond)
+	err := h.gameSvc.DeleteCall(userIdFirst, call.UserIdSecond)
 	if err != nil {
 		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusNotFound)

@@ -2,14 +2,13 @@ package service
 
 import (
 	"Run_Hse_Run/pkg/model"
-	"Run_Hse_Run/pkg/repository"
 	"errors"
 	"fmt"
 	"regexp"
 )
 
 type UsersService struct {
-	repo *repository.Repository
+	repo UsersRepository
 }
 
 func (u *UsersService) ChangeProfileImage(userId, image int) error {
@@ -46,6 +45,6 @@ func (u *UsersService) GetUserById(userId int) (model.User, error) {
 	return u.repo.GetUserById(userId)
 }
 
-func NewUsersService(repo *repository.Repository) *UsersService {
+func NewUsersService(repo UsersRepository) *UsersService {
 	return &UsersService{repo: repo}
 }

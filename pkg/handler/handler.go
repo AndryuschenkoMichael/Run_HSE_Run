@@ -9,15 +9,31 @@ import (
 )
 
 type Handler struct {
-	services *service.Service
+	authSvc    service.Authorization
+	friendsSvc service.Friends
+	gameSvc    service.Game
+	senderSvc  service.Sender
+	usersSvc   service.Users
 }
 
-func NewHandler(services *service.Service) *Handler {
-	return &Handler{services: services}
+func NewHandler(
+	authSvc service.Authorization,
+	friendsSvc service.Friends,
+	gameSvc service.Game,
+	senderSvc service.Sender,
+	usersSvc service.Users) *Handler {
+
+	return &Handler{
+		authSvc:    authSvc,
+		friendsSvc: friendsSvc,
+		gameSvc:    gameSvc,
+		senderSvc:  senderSvc,
+		usersSvc:   usersSvc,
+	}
 }
 
-func (h *Handler) InitRoutes() chi.Router {
-	router := chi.NewRouter()
+func (h *Handler) NewMuxRoutes() *chi.Mux {
+	router := chi.NewMux()
 	router.Use(middleware.Logger)
 
 	router.Route("/auth", func(router chi.Router) {
@@ -50,7 +66,7 @@ func (h *Handler) InitRoutes() chi.Router {
 			router.Put("/send-time", h.sendTime)
 		})
 
-		router.Get("/upgrade-connection", h.services.UpgradeConnection)
+		router.Get("/upgrade-connection", h.gameSvc.UpgradeConnection)
 	})
 
 	router.Get("/ping", func(writer http.ResponseWriter, request *http.Request) {

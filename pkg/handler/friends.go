@@ -26,7 +26,7 @@ func (h *Handler) addFriend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.services.AddFriend(userId, userIdTo.UserId)
+	err := h.friendsSvc.AddFriend(userId, userIdTo.UserId)
 	if err != nil {
 		logger.WarningLogger.Println(err)
 		w.WriteHeader(http.StatusNotFound)
@@ -57,7 +57,7 @@ func (h *Handler) deleteFriend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = h.services.DeleteFriend(userId, userIdTo.UserId)
+	_ = h.friendsSvc.DeleteFriend(userId, userIdTo.UserId)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -69,7 +69,7 @@ func (h *Handler) getFriends(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	users, err := h.services.GetFriends(userId)
+	users, err := h.friendsSvc.GetFriends(userId)
 
 	if err != nil {
 		logger.WarningLogger.Println(err)
